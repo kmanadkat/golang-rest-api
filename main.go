@@ -135,5 +135,21 @@ func updateTodo(c *fiber.Ctx) error {
 }
 
 func deleteTodo(c *fiber.Ctx) error {
-	return nil
+	// Prepare Object Id
+	id := c.Params("id")
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "Invalid Todo Id"})
+	}
+
+	// Prepare Data
+	filter := bson.M{"_id": objectId}
+	_, err = collection.DeleteOne(context.Background(), filter)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"msg": "Error updating todo"})
+	}
+
+	// Respond Back
+	response := fiber.Map{"msg": "Todo deleted successfully"}
+	return c.Status(200).JSON(response)
 }
